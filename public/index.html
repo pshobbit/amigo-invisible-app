@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amigo Invisible Familiar</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONOS ---
+        const Gift = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>;
+        const Trash2 = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
+        const Check = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+        const EyeOff = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>;
+        const Shuffle = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>;
+
+        // --- COMPONENTES EXTRAÍDOS (Solución al bug de input) ---
+
+        const LoginVista = ({ usuarios, onSelectUsuario, onAddUsuario, onSortear, onReiniciar }) => {
+            const [nuevoUsuario, setNuevoUsuario] = useState('');
+
+            const handleAdd = () => {
+                if(nuevoUsuario.trim()) {
+                    onAddUsuario(nuevoUsuario);
+                    setNuevoUsuario('');
+                }
+            }
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50 p-6">
+                    <div className="max-w-md mx-auto">
+                        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                            <div className="flex items-center justify-center mb-6">
+                                <div className="mr-3 text-red-500"><Gift /></div>
+                                <h1 className="text-3xl font-bold text-gray-800">Navidad</h1>
+                            </div>
+
+                            <div className="mb-6">
+                                <h2 className="text-lg font-semibold mb-3 text-gray-700">¿Quién eres?</h2>
+                                <div className="space-y-2 max-h-60 overflow-y-auto">
+                                    {usuarios.map(u => (
+                                        <button key={u._id} onClick={() => onSelectUsuario(u)} className="w-full p-3 bg-green-50 hover:bg-green-100 rounded-lg text-left font-medium text-gray-800 transition border border-green-100">
+                                            {u.nombre}
+                                        </button>
+                                    ))}
+                                    {usuarios.length === 0 && <p className="text-center text-gray-400">Añade familiares abajo...</p>}
+                                </div>
+                            </div>
+
+                            <div className="border-t pt-6">
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        value={nuevoUsuario}
+                                        onChange={(e) => setNuevoUsuario(e.target.value)}
+                                        placeholder="Nombre..." 
+                                        className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                                    />
+                                    <button onClick={handleAdd} className="px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 font-bold">+</button>
+                                </div>
+                            </div>
+
+                            {usuarios.length >= 2 && (
+                                <button onClick={onSortear} className="w-full mt-6 p-4 bg-gradient-to-r from-red-500 to-green-500 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition">
+                                    <Shuffle /> Sortear Amigos Invisibles
+                                </button>
+                            )}
+                            
+                            <button onClick={onReiniciar} className="block mx-auto mt-4 text-xs text-gray-400 hover:text-red-500">Reiniciar App</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const PanelUsuario = ({ usuarioActual, usuarios, onLogout, onAddDeseo, onDeleteDeseo, onToggleCompra }) => {
+            const [nuevoDeseo, setNuevoDeseo] = useState('');
+            
+            // Buscar al amigo invisible
+            const amigoId = usuarioActual.amigoInvisible;
+            const amigoObj = usuarios.find(u => u._id === amigoId);
+
+            const handleAdd = () => {
+                if(nuevoDeseo.trim()){
+                    onAddDeseo(nuevoDeseo);
+                    setNuevoDeseo('');
+                }
+            }
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50 p-6">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h1 className="text-2xl font-bold text-gray-800">Hola, {usuarioActual.nombre} 👋</h1>
+                                <button onClick={onLogout} className="px-4 py-2 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">Salir</button>
+                            </div>
+
+                            {amigoObj ? (
+                                <div className="bg-red-100 border border-red-200 p-4 rounded-lg mb-6 text-center">
+                                    <p className="text-gray-600 uppercase text-xs font-bold tracking-wider">Tu Amigo Invisible es</p>
+                                    <p className="text-2xl font-bold text-red-600 mt-1">{amigoObj.nombre}</p>
+                                </div>
+                            ) : (
+                                <div className="bg-yellow-50 p-4 rounded-lg mb-6 text-center text-yellow-700">
+                                    Aún no se ha realizado el sorteo. ¡Rellena tu lista mientras!
+                                </div>
+                            )}
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {/* MI LISTA */}
+                                <div className="bg-blue-50 p-6 rounded-xl">
+                                    <h2 className="text-lg font-bold mb-4 text-blue-800 flex items-center gap-2">📝 Mi Lista</h2>
+                                    <div className="flex gap-2 mb-4">
+                                        <input 
+                                            value={nuevoDeseo}
+                                            onChange={(e) => setNuevoDeseo(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
+                                            className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                                            placeholder="Quiero..." 
+                                        />
+                                        <button onClick={handleAdd} className="bg-blue-500 text-white px-4 rounded hover:bg-blue-600">+</button>
+                                    </div>
+                                    <ul className="space-y-2">
+                                        {usuarioActual.deseos.map(d => (
+                                            <li key={d._id} className="flex justify-between bg-white p-2 rounded shadow-sm">
+                                                <span>{d.texto}</span>
+                                                <button onClick={() => onDeleteDeseo(d._id)} className="text-red-400 hover:text-red-600"><Trash2/></button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* LISTA DE MI AMIGO */}
+                                {amigoObj && (
+                                    <div className="bg-green-50 p-6 rounded-xl">
+                                        <h2 className="text-lg font-bold mb-4 text-green-800 flex items-center gap-2">🎁 Lista de {amigoObj.nombre}</h2>
+                                        <ul className="space-y-2">
+                                            {amigoObj.deseos.length === 0 && <li className="text-gray-500 italic">No ha pedido nada aún...</li>}
+                                            {amigoObj.deseos.map(d => {
+                                                const esCompradoPorMi = d.comprado && d.compradoPor === usuarioActual._id;
+                                                const esCompradoPorOtro = d.comprado && d.compradoPor !== usuarioActual._id;
+
+                                                return (
+                                                    <li key={d._id} className={`flex justify-between items-center p-3 rounded shadow-sm transition ${esCompradoPorMi ? 'bg-green-200' : esCompradoPorOtro ? 'bg-gray-200 opacity-60' : 'bg-white'}`}>
+                                                        <span className={d.comprado ? 'line-through text-gray-600' : ''}>{d.texto}</span>
+                                                        
+                                                        {esCompradoPorOtro ? (
+                                                            <span className="text-xs flex items-center gap-1 text-gray-500"><EyeOff/> Ocupado</span>
+                                                        ) : (
+                                                            <button 
+                                                                onClick={() => onToggleCompra(amigoObj._id, d._id, !d.comprado)}
+                                                                className={`p-2 rounded-full ${esCompradoPorMi ? 'text-green-700 bg-white' : 'text-gray-300 hover:text-green-500 hover:bg-green-50'}`}
+                                                            >
+                                                                <Check />
+                                                            </button>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                        <p className="text-xs text-gray-500 mt-4 text-center">Marca lo que vayas a comprar. {amigoObj.nombre} NO verá esto.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- COMPONENTE PRINCIPAL ---
+
+        function AmigoInvisible() {
+            const [usuarios, setUsuarios] = useState([]);
+            const [usuarioActual, setUsuarioActual] = useState(null);
+            
+            // Cargar datos del servidor
+            const fetchUsuarios = async () => {
+                try {
+                    const res = await fetch('/api/usuarios');
+                    const data = await res.json();
+                    setUsuarios(data);
+                    
+                    // Si hay usuario logueado, actualizar su estado para ver cambios en tiempo real
+                    if(usuarioActual) {
+                        const updated = data.find(u => u._id === usuarioActual._id);
+                        setUsuarioActual(updated);
+                    }
+                } catch (err) {
+                    console.error("Error cargando", err);
+                }
+            };
+
+            useEffect(() => {
+                fetchUsuarios();
+                // Polling simple: refrescar cada 5 seg para ver si alguien pidió algo nuevo
+                const interval = setInterval(fetchUsuarios, 5000);
+                return () => clearInterval(interval);
+            }, [usuarioActual?._id]); 
+
+            // Acciones
+            const agregarUsuario = async (nombre) => {
+                await fetch('/api/usuarios', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ nombre })
+                });
+                fetchUsuarios();
+            };
+
+            const sortear = async () => {
+                if(!confirm('¿Seguro? Esto reasignará a todos.')) return;
+                await fetch('/api/sortear', { method: 'POST' });
+                alert('¡Sorteo realizado!');
+                fetchUsuarios();
+            };
+
+            const agregarDeseo = async (texto) => {
+                await fetch(`/api/usuarios/${usuarioActual._id}/deseos`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ texto })
+                });
+                fetchUsuarios();
+            };
+
+            const eliminarDeseo = async (deseoId) => {
+                await fetch(`/api/usuarios/${usuarioActual._id}/deseos/${deseoId}`, { method: 'DELETE' });
+                fetchUsuarios();
+            };
+
+            const toggleCompra = async (receptorId, deseoId, comprar) => {
+                await fetch(`/api/comprar/${receptorId}/${deseoId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        compradorId: usuarioActual._id, 
+                        accion: comprar ? 'comprar' : 'liberar' 
+                    })
+                });
+                fetchUsuarios();
+            };
+
+            const reiniciar = async () => {
+                if(confirm('PELIGRO: Esto borra a todos los usuarios y regalos. ¿Seguro?')) {
+                    await fetch('/api/reiniciar', { method: 'POST' });
+                    setUsuarioActual(null);
+                    fetchUsuarios();
+                }
+            };
+
+            if (!usuarioActual) {
+                return (
+                    <LoginVista 
+                        usuarios={usuarios} 
+                        onSelectUsuario={setUsuarioActual}
+                        onAddUsuario={agregarUsuario}
+                        onSortear={sortear}
+                        onReiniciar={reiniciar}
+                    />
+                );
+            }
+
+            return (
+                <PanelUsuario 
+                    usuarioActual={usuarioActual}
+                    usuarios={usuarios} // Pasamos todos para buscar al amigo invisible
+                    onLogout={() => setUsuarioActual(null)}
+                    onAddDeseo={agregarDeseo}
+                    onDeleteDeseo={eliminarDeseo}
+                    onToggleCompra={toggleCompra}
+                />
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AmigoInvisible />);
+    </script>
+</body>
+</html>
