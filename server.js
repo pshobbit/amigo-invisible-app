@@ -13,11 +13,9 @@ app.use(express.json());
 app.use(express.static('public')); // Servirá tu HTML estático
 
 // Conexión a Base de Datos (MongoDB)
-require('dotenv').config();
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Conectado a MongoDB'))
     .catch(err => console.error('Error conectando a DB:', err));
-
 // --- API ENDPOINTS ---
 
 // 1. Obtener todos los usuarios (para el login y recargar datos)
